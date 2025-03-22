@@ -52,8 +52,44 @@
         </section>
     </main>
     
-    <footer>
-        <p>&copy; 2024 louis ruble</p>
-    </footer>
+    <footer style="
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(217, 184, 128, 0.666);
+    display: flex;
+    gap: 5px;
+    position: relative;
+">
+    <!-- Conteneur pour les images de ligne -->
+    <div style="
+        position: absolute;
+        top: -8px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        display: flex;
+        overflow: hidden;
+    ">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+    </div>
+    
+    <span style="font-family: 'Space Mono', monospace;"></span>
+    <img src="../vignettes/icone.png" alt="louis" style="width: 30px; height: 25px; filter: invert(100%);">
+    <span style="font-family: 'Space Mono', monospace; color: #000;">louis - <span id="time"></span></span>
+    <script>
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</footer>
 </body>
 </html>
