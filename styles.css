@@ -7,7 +7,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
 
-    background: #333 url('./vignettes/background4.png') center/cover fixed;    background-size: cover;
+    background: #333 url('./vignettes/background4_1.png') center/cover fixed;    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     background-attachment: fixed;
