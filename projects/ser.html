@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HuBERT/LSTM-based SpeechER</title>
+    <link rel="icon" type="image/png" href="../vignettes/icone.jpg">
+
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        .project-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .project-info div {
+            flex: 1;
+        }
+        .project-description img {
+            max-width: 100%;
+            height: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>HuBERT/LSTM-based SpeechER </h1>
+        <nav style="display: flex; gap: 20px;">
+            <a href="../home.html">home</a>
+            <a href="../projects.html">Projects</a>
+        </nav>
+    </header>
+    <main>
+        <section class="project-info">
+            <div>
+                <h2>Duration</h2>
+                <p>November 2024</p>
+            </div>
+            <div>
+                <h2>Location</h2>
+                <p>Universidad de Zaragoza</p>
+            </div>
+        </section>
+        <section class="project-description">
+            <h2>Description</h2>
+            
+            <p>This short project was completed during my Erasmus exchange at the University of Zaragoza.</p>
+        
+            <p>The <strong>Speech Emotion Recognition (SER)</strong> project implements a model to classify emotional states from voice signals. The system was trained on the <strong>ShEMO dataset</strong>, containing <strong>3,000 audio samples</strong> from <strong>87 native Persian speakers</strong>.</p>
+            <p>The model architecture leverages <strong>HuBERT</strong>, a pre-trained Transformer model for feature extraction, combined with <strong>LSTM layers</strong> for temporal modeling and <strong>fully connected layers</strong> for classification. This approach efficiently captures <strong>long-range dependencies</strong> in audio signals, integrating <strong>dropout</strong> and <strong>pooling</strong> techniques for improved robustness.</p>
+            <img src="images/ser_architecture.jpeg" alt="SER Architecture" width="600" height="400">
+        
+            <h2>Results</h2>
+            <p>The system achieved <strong>94% precision</strong> on binary classification (<strong>Angry vs. Neutral</strong>) after <strong>10 epochs</strong>. These results highlight the model's potential for future applications.</p>
+        
+            <h2>Future Work</h2>
+            <p>Future improvements will focus on <strong>multi-class classification</strong> and the exploration of advanced architectures, such as <strong>attention-based models</strong>, <strong>Bi-LSTMs</strong>, and <strong>Vision Transformers (ViT)</strong>.</p>
+        </section>
+    </main>
+    
+    <footer style="
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(217, 184, 128, 0.666);
+    display: flex;
+    gap: 5px;
+    position: relative;
+">
+    <div style="
+        position: absolute;
+        top: -8px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        display: flex;
+        overflow: hidden;
+    ">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+    </div>
+    
+    <span style="font-family: 'Space Mono', monospace;"></span>
+    <img src="../vignettes/icone.png" alt="louis" style="width: 30px; height: 25px; filter: invert(100%);">
+    <span style="font-family: 'Space Mono', monospace; color: #000;">louis - <span id="time"></span></span>
+    <script>
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</footer>
+</body>
+</html>
