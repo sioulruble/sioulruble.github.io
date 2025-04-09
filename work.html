@@ -24,6 +24,24 @@
         .button-link:hover {
             background-color: rgba(217, 184, 128, 1);
         }
+
+        /* Mise à jour du style pour les liens de CV et projets */
+        .resume-content a {
+            text-decoration: none;
+            color: black;
+            font-size: 1em;
+            margin: 0 10px;
+            padding: 8px 15px;
+            border: 1px solid #000;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .resume-content a:hover {
+            background-color: transparent;
+            transform: translateY(3px) perspective(500px) rotateX(10deg) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 <body>
@@ -41,17 +59,17 @@
             <h2>my curriculum vitae</h2>
             <p>Here's my full resume.</p>
 
-            <a href="CV_EN_RUBLE_Louis.pdf" download class="download-button">
+            <a href="CV_EN_RUBLE_Louis.pdf" download>
                 <img src="vignettes/uk_flag.jpg" alt="English Flag" style="width: 20px; height: auto;vertical-align: middle;"> en
             </a>
-            <a href="CV_FR_RUBLE_Louis.pdf" download class="download-button">
+            <a href="CV_FR_RUBLE_Louis.pdf" download>
                 <img src="vignettes/france_flag.jpg" alt="French Flag" style="width: 20px; height: auto;vertical-align: middle;"> fr
             </a>
             
             <div style="margin-top: 40px;">
                 <h2>some of my academic projects</h2>
                 <p>Explore my portfolio of projects.</p>
-                <a href="projects.html" class="download-button"">view all projects</a>
+                <a href="projects.html">view all projects</a>
             </div>
         </section>
     </main>
