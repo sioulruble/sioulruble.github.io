@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../vignettes/icone.jpg">
+
+    <title>blog</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>blog</h1>
+        <nav>
+            <a href="../../../sioulruble.github.io/">home</a>
+        </nav>
+    </header>
+    <main class="resume-container">
+        <section class="resume-content" style="text-align: left;">
+            <h2 style="margin-top:0;">my last week of classes : my first sci-fi short-story</h2>
+            <p>
+                This was my last week of classes, probably ever. What a way to end—with a solarpunk writing workshop that I absolutely loved. This is actually my first time writing, and I'm planning to start writing every day now. I can already see the benefits, even on my imagination.
+            </p>
+            <p>
+                For those unfamiliar, solarpunk is a science fiction subgenre that imagines optimistic, sustainable futures. Instead of the usual dystopian narratives, it focuses on communities, green technology, and social justice—basically asking "what if we actually solved our problems?".
+            </p>
+            <p>
+                I'm genuinely passionate about writing. It's such a real exercise for structuring your thoughts. I'm heavily inspired by writers like Alain Damasio, Ted Chiang, and Philip K. Dick. What draws me to them is that speculative fiction, political anticipation aspect—using science fiction to explore where we might be heading socially and politically. But this workshop made me realize something: writing science fiction is super hard. You have all the usual literary challenges—character, plot, prose. But then you also need the scientific side to be coherent and understandable. That's the real challenge when you want to write SF. When you get carried away by your ideas (and it's easy to do), you can quickly produce something that becomes incomprehensible to the average reader.
+            </p>
+            <p>
+                We also had a fascinating conference on history of the technics by <a href="https://www.babelio.com/auteur/Guillaume-Carnino/68576" target="_blank">Guillaume Carnino</a>. He argued that our relationship with technology has fundamentally changed how we imagine the future. The key point: there's no technological determinism, but technology is definitely a factor. The problem is we've created distance between techniques and contemporary lifestyle, essentially repressing the power of technology. Four attitudes emerge from this repression: neutrality mythology (pretending technology is neutral), techno-solutionism (believing technology will solve human problems), conspiracism (blaming big corporations), and apocalypticism (post-apocalyptic fictions have become desirable because they're less anxiety-provoking than our current uncertainty).
+            </p>
+            <blockquote class="fancy-quote">
+                <em>It's easier to imagine the end of the world than the end of capitalism.</em> - Frederic Jameson
+            </blockquote>
+            <p>
+                The takeaway? We need to acknowledge that technology isn't neutral and that we don't have as much control as we think. A society with or without knives isn't the same society.
+            </p>
+
+            <p>
+    It was also really great to discover alternatives to Big Tech—like Mastodon, collaborative pads, or the Framasoft blog. It's empowering to know that real, open-source alternatives exist and that we don’t have to rely solely on the GAFAM ecosystem.
+</p>
+            <p>
+                Thanks to <a href="https://stph.crzt.fr/co/stph.html" target="_blank">Stéphane Crozat</a>, <a href="https://www.babelio.com/auteur/Guillaume-Carnino/68576" target="_blank">Guillaume Carnino</a>, <a href="https://www.kervran.org/index.html" target="_blank">Yann Kervran</a> and all the other supervisors who made this final week so meaningful. Not a bad way to end my academic career.
+            </p>
+
+            
+
+            <p>
+                Here's my story in French, if you're interested: 
+                <a href="rublelouis.retrouverlapeche.pdf">Retrouver la pêche</a>.
+            </p>
+        </section>
+    </main>
+    <footer style="
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(217, 184, 128, 0.666);
+    display: flex;
+    gap: 5px;
+    position: relative;
+">
+    <!-- Conteneur pour les images de ligne -->
+    <div style="
+        position: absolute;
+        top: -8px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        display: flex;
+        overflow: hidden;
+    ">
+        <!-- 8 instances de l'image de ligne -->
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+    </div>
+    
+    <span style="font-family: 'Space Mono', monospace;"></span>
+    <img src="../../vignettes/icone.png" alt="louis" style="width: 30px; height: 25px; filter: invert(100%);">
+    <span style="font-family: 'Space Mono', monospace; color: #000;">louis - <span id="time"></span></span>
+    <script>
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</footer>
+</body>
+</html>

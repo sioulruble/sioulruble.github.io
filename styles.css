@@ -156,3 +156,24 @@ footer {
     color: #555;
     text-align: center;
 }
+
+.fancy-quote {
+    margin: 2em 0;
+    padding: 1.2em 2em;
+    background: rgba(240,240,240,0.7);
+    border-left: 5px solid #bfa14a;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1em;
+    color: #222;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    position: relative;
+}
+.fancy-quote:before {
+    content: "❝";
+    font-size: 2em;
+    color: #bfa14a;
+    position: absolute;
+    left: 12px;
+    top: 2px;
+}
