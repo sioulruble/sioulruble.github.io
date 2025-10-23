@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="../../vignettes/icone.jpg">
+
+    <title>blog</title>
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>blog</h1>
+        <nav>
+            <a href="../../../sioulruble.github.io/">home</a>
+        </nav>
+    </header>
+    <main class="resume-container">
+        <section class="resume-content" style="text-align: left;">
+            <h2 style="margin-top:0;">computer vision & art #1 : imaginary landscapes</h2>
+<h3>Observation</h3>
+
+<p>Standing in front of my uncle's workshop in Alsace, a month ago. Electronics scattered across every surface—the archaeology of half-finished projects. In the center: a tower. Not intentional. Just accumulation. Capacitors, resistors, PCBs stacked vertically by accident or entropy.</p>
+
+<img src="bordel_jc.jpeg" alt="Electronics workshop with scattered components" style="width: 50%; margin: 20px 0;">
+<p>I'm looking at it but I'm not <em>there</em> anymore.</p>
+
+<p>The tower becomes architecture. The clutter becomes urbanism. The workshop dissolves into something else entirely.</p>
+
+<p>Three months earlier: Kuala Lumpur with Walid. Towers rising through humidity and haze. The way buildings emerge from density, from the noise floor of the city itself.</p>
+
+<img src="kl_skyscraper.jpg" alt="Kuala Lumpur skyscrapers through haze" style="width: 50%; margin: 20px 0;">
+
+<p>This is how memory works, I think. Surfaces map onto other surfaces. A pile of electronics <em>is</em> a skyscraper if the correspondence is strong enough. Geography becomes psychological. The workshop <em>contains</em> Malaysia because I decided it does.</p>
+
+<br>
+
+<h3>Correspondence</h3>
+
+<p>Brian Eno describes his ambient works as "imaginary landscapes"—places that exist in the intersection of observation and projection. In the 1989 documentary of the same name, Eno walks through actual landscapes—California, Suffolk, New York—while explaining how these physical spaces inform his mental ones. The instrumental pieces he creates aren't illustrations of place, but rather <em>landscapes for the mind</em>, spaces you inhabit perceptually rather than physically.</p>
+
+<p><em>The Shutov Assembly</em>, released around that time, exemplifies this. Each piece has a nine-letter title referring to a real location (all of which hosted one of Eno's artworks) without being in any way illustrative. The music exists parallel to the place, not as its representation.</p>
+
+<p>What if landscape is always already imaginary? What if space is just perspective waiting to be transformed?</p>
+
+<p>Homographic projection: a method for mapping one planar surface onto another through mathematical transformation.</p>
+
+<div style="padding: 15px; margin: 15px 0; background-color: transparent; border: 2px solid #000;">
+<strong>The homography matrix H relates corresponding points between two images:</strong><br><br>
+<span style="font-family: 'Times New Roman', serif; font-style: italic; font-size: 1.1em;"><strong>x'</strong> = <strong>H</strong> <strong>x</strong></span>
+</div>
+
+<p>Where <strong>x</strong> is a point in image 1 and <strong>x'</strong> is its corresponding point in image 2.</p>
+
+<div style="padding: 15px; margin: 15px 0; background-color: transparent; border: 2px solid #000;">
+<strong>For calibrated cameras observing a planar surface:</strong><br><br>
+<span style="font-family: 'Times New Roman', serif; font-style: italic; font-size: 1.1em;"><strong>H</strong> = <strong>K'</strong>(<strong>R</strong> - <strong>t</strong> <strong>n</strong><sup>T</sup>/d) <strong>K</strong><sup>-1</sup></span>
+</div>
+
+<p>Where:</p>
+<ul>
+    <li><strong>K</strong>, <strong>K'</strong> are the intrinsic camera matrices</li>
+    <li><strong>R</strong>, <strong>t</strong> describe rotation and translation between cameras</li>
+    <li><strong>n</strong>, d define the plane's normal and distance</li>
+</ul>
+
+<p>In practice: select four corresponding points between two images. The algorithm calculates the transformation matrix. Apply the warp. Blend at varying ratios.</p>
+
+<p><strong>The code is minimal:</strong></p>
+
+<pre style="background-color: transparent; padding: 15px; border: 2px solid #000; border-radius: 0; overflow-x: auto; font-family: 'Courier New', 'Consolas', monospace;"><code># Load images
+img1 = cv2.imread("bordel_jc.jpeg")
+img2 = cv2.imread("kl_skyscraper.jpg")
+
+# Select 4 corresponding points on each image
+pts_img1 = [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
+pts_img2 = [[x1',y1'], [x2',y2'], [x3',y3'], [x4',y4']]
+
+# Calculate homography
+H = cv2.getPerspectiveTransform(pts_img2, pts_img1)
+
+# Warp and blend
+warped = cv2.warpPerspective(img2, H, (width, height))
+result = cv2.addWeighted(img1, 0.5, warped, 0.5, 0)
+</code></pre>
+
+<p>What interests me isn't the complexity—it's the <em>compression</em>. Four points. One matrix. Two realities collapse into a third space that belongs to neither.</p>
+
+<p>The result: Kuala Lumpur rising from tangled cables. Malaysia superimposed on Alsace. Neither location is preserved. Both are present.</p>
+
+<img src="img2_with_img1_50-50.jpg"  style="width: 60%; margin: 20px 0;">
+
+<p>The 50-50 blend reveals something—not quite synthesis, more like interference. You can see <em>through</em> one image into the other. Texture from the workshop bleeds into the tower's geometry. The skyscraper's verticality organizes the chaos below it.</p>
+
+<p>It's not realistic. It's not supposed to be. It's a study in <em>correspondence</em>—how one surface can activate the latent structure in another.</p>
+
+<br>
+
+<h3>Synthesis</h3>
+
+<p>Eno's imaginary landscapes exist at the intersection of physical space and mental projection. My uncle's workshop felt like a city not because it resembled one literally, but because the <em>correspondence</em> was psychologically strong enough. The homography doesn't create this correspondence—it reveals it, materializes it, makes it visible.</p>
+
+<p>This is what computation offers: the ability to honor associations that exist only perceptually. The algorithm takes seriously what might otherwise remain a passing thought, a daydream. It transforms the imaginary into the concrete without demanding that the imaginary become realistic.</p>
+
+<p>The workshop is still a mess. The tower of electronics hasn't moved. But now it contains Kuala Lumpur—not as metaphor, not as analogy, but as actual superposition. A third space that exists only in the projection, only in the mathematical transformation of one perspective into another.</p>
+
+<p>Sometimes the most interesting landscapes are the ones that never existed until you decided they did.</p>
+
+<hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
+
+
+
+
+
+
+
+        </section>
+    </main>
+    <footer style="
+    margin-top: 12px;
+    padding: 8px;
+    background-color: rgba(217, 184, 128, 0.666);
+    display: flex;
+    gap: 5px;
+    position: relative;
+">
+    <!-- Conteneur pour les images de ligne -->
+    <div style="
+        position: absolute;
+        top: -8px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        display: flex;
+        overflow: hidden;
+    ">
+        <!-- 8 instances de l'image de ligne -->
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+        <img src="../../vignettes/footer.png" style="height: 15px; width: 42.5%; opacity: 0.45;">
+    </div>
+    
+    <span style="font-family: 'Space Mono', monospace;"></span>
+    <img src="../../vignettes/icone.png" alt="louis" style="width: 30px; height: 25px; filter: invert(100%);">
+    <span style="font-family: 'Space Mono', monospace; color: #000;">louis - <span id="time"></span></span>
+    <script>
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleTimeString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</footer>
+</body>
+</html>
