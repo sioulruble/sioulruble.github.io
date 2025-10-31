@@ -19,28 +19,31 @@
     <main class="resume-container">
         <section class="resume-content" style="text-align: left;">
             <h2 style="margin-top:0;">computer vision & art #1 : imaginary landscapes</h2>
-<h3>Observation</h3>
+<h2>observation</h2>
 
-<p>Standing in front of my uncle's workshop in Alsace, a month ago. Electronics scattered across every surface—the archaeology of half-finished projects. In the center: a tower. Not intentional. Just accumulation. Capacitors, resistors, PCBs stacked vertically by accident or entropy.</p>
+<p>Last time I was at my uncle's place in Alsace, in his electronics workshop. Complete chaos. Components everywhere, documentation scattered, cables tangled, speakers stacked on top of each other, a chair in the middle of it all. Nothing in its right place.</p>
 
-<img src="bordel_jc.jpeg" alt="Electronics workshop with scattered components" style="width: 50%; margin: 20px 0;">
-<p>I'm looking at it but I'm not <em>there</em> anymore.</p>
+<p>Then my attention fixes on this tower of electronic components—hundreds of resistors and capacitors stacked vertically, layer upon layer.</p>
 
-<p>The tower becomes architecture. The clutter becomes urbanism. The workshop dissolves into something else entirely.</p>
+<img src="bordel_jc.jpeg" alt="Electronics workshop with scattered components" style="width: 40%; margin: 20px 0;">
 
-<p>Three months earlier: Kuala Lumpur with Walid. Towers rising through humidity and haze. The way buildings emerge from density, from the noise floor of the city itself.</p>
+<p>I'm someone who daydreams way too much. And I start fixating completely on this tower. It reminds me of something. I don't know what yet.</p>
+
+<p>Then it hits me—this view Walid and I had in Kuala Lumpur. We were in this sort of informal settlement with houses that made no architectural sense, grass, concrete, trees, a power line, and in the distance, the massive Kuala Lumpur skyline, majestic.</p>
 
 <img src="kl_skyscraper.jpg" alt="Kuala Lumpur skyscrapers through haze" style="width: 50%; margin: 20px 0;">
 
-<p>This is how memory works, I think. Surfaces map onto other surfaces. A pile of electronics <em>is</em> a skyscraper if the correspondence is strong enough. Geography becomes psychological. The workshop <em>contains</em> Malaysia because I decided it does.</p>
+<p>I'm looking at the tower but I'm not <em>there</em> anymore. The tower becomes architecture. The clutter becomes urbanism. The workshop dissolves into something else entirely.</p>
 
-<br>
+<p>This is how memory works, I think. Surfaces map onto other surfaces. A pile of electronics <em>is</em> a skyscraper if the correspondence is strong enough.</p>
 
-<h3>Correspondence</h3>
+<h2>correspondence</h2>
 
-<p>Brian Eno describes his ambient works as "imaginary landscapes"—places that exist in the intersection of observation and projection. In the 1989 documentary of the same name, Eno walks through actual landscapes—California, Suffolk, New York—while explaining how these physical spaces inform his mental ones. The instrumental pieces he creates aren't illustrations of place, but rather <em>landscapes for the mind</em>, spaces you inhabit perceptually rather than physically.</p>
+<p>Then I remember this course in computer vision where we learned to superimpose two images with the right projection: homographic projection.</p>
 
-<p><em>The Shutov Assembly</em>, released around that time, exemplifies this. Each piece has a nine-letter title referring to a real location (all of which hosted one of Eno's artworks) without being in any way illustrative. The music exists parallel to the place, not as its representation.</p>
+<p>Brian Eno describes his ambient works as "imaginary landscapes" : places that exist in the intersection of observation and projection. In <a href="https://youtu.be/1lH_qcLjmmU?si=mtxGGgUwT3toA8Q6"> the 1989 documentary </a>  of the same name, Eno walks through actual landscapes : California, Suffolk, New York while explaining how these physical spaces inform his mental ones. The instrumental pieces he creates aren't illustrations of place, but rather <em>landscapes for the mind</em>, spaces you inhabit perceptually rather than physically.</p>
+
+<p><a href="https://open.spotify.com/intl-fr/album/6NhNNVgJ1w3pf1AOzAjSN3?si=g7DPS8b7QgeKFA422LB4PA">The Shutov Assembly</a>, released around that time, exemplifies this. Each piece has a nine-letter title referring to a real location without being in any way illustrative. The music exists parallel to the place, not as its representation.</p>
 
 <p>What if landscape is always already imaginary? What if space is just perspective waiting to be transformed?</p>
 
@@ -85,29 +88,103 @@ warped = cv2.warpPerspective(img2, H, (width, height))
 result = cv2.addWeighted(img1, 0.5, warped, 0.5, 0)
 </code></pre>
 
-<p>What interests me isn't the complexity—it's the <em>compression</em>. Four points. One matrix. Two realities collapse into a third space that belongs to neither.</p>
+<p>What interests me isn't the complexity : it's the <em>compression</em>. Four points. One matrix. Two realities collapse into a third space that belongs to neither.</p>
+
 
 <p>The result: Kuala Lumpur rising from tangled cables. Malaysia superimposed on Alsace. Neither location is preserved. Both are present.</p>
 
-<img src="img2_with_img1_50-50.jpg"  style="width: 60%; margin: 20px 0;">
+<body>
+    <div style="max-width: 900px; margin: 0 auto; padding: 20px; font-family: 'Space Mono', monospace;">
+        
+        <div style="background: #f5f5f5; border: 2px solid #000; margin-bottom: 20px;">
+            <canvas id="canvas" style="width: 100%; display: block; border: 1px solid #ccc;"></canvas>
+        </div>
+        
+        <div style="background: #f5f5f5; padding: 20px; border: 2px solid #000;">
+            <label style="display: block; margin-bottom: 10px; font-weight: bold;">
+                blending: <span id="blendValue">50%</span>
+            </label>
+            <input type="range" id="blendSlider" min="0" max="100" value="50" 
+                   style="width: 100%; height: 30px; cursor: pointer;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.9em; margin-top: 5px;">
+                <span> warped electronic mess</span>
+                <span>kualu lumpur skyline</span>
+            </div>
+        </div>
+    </div>
 
-<p>The 50-50 blend reveals something—not quite synthesis, more like interference. You can see <em>through</em> one image into the other. Texture from the workshop bleeds into the tower's geometry. The skyscraper's verticality organizes the chaos below it.</p>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const slider = document.getElementById('blendSlider');
+        const valueDisplay = document.getElementById('blendValue');
+
+        const img1 = new Image();
+        const img2 = new Image();
+
+        img1.src = 'bordel_warped.jpg';
+        img2.src = 'kl_skyscraper.jpg';
+
+        let imagesLoaded = 0;
+
+        function onImageLoad() {
+            imagesLoaded++;
+            if (imagesLoaded === 2) {
+                canvas.width = img1.width;
+                canvas.height = img1.height;
+                blendImages();
+            }
+        }
+
+        img1.onload = onImageLoad;
+        img2.onload = onImageLoad;
+
+        function blendImages() {
+            const alpha = slider.value / 100;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Dessiner img1 (bordel_warped)
+            ctx.globalAlpha = 1 - alpha;
+            ctx.drawImage(img1, 0, 0);
+            
+            // Dessiner img2 (kl_skyscraper) par-dessus
+            ctx.globalAlpha = alpha;
+            ctx.drawImage(img2, 0, 0);
+            
+            ctx.globalAlpha = 1;
+            valueDisplay.textContent = slider.value + '%';
+        }
+
+        slider.addEventListener('input', blendImages);
+    </script>
+</body>
+
+<p>And I'm not going to lie : I'm pretty damn proud of the result.</p>
+
+<p> The 50-50 blend reveals something—not quite synthesis, more like interference. The two towers—one of components, one a skyscraper—superimpose majestically. A desk lamp becomes a street light. Cables everywhere suggest power lines crossing the urban grid. The scattered documentation and stacked speakers read as buildings. The glow of the skyscraper bleeds through the scene. Two forms of chaos layered into one.</p>
 
 <p>It's not realistic. It's not supposed to be. It's a study in <em>correspondence</em>—how one surface can activate the latent structure in another.</p>
 
-<br>
 
-<h3>Synthesis</h3>
 
-<p>Eno's imaginary landscapes exist at the intersection of physical space and mental projection. My uncle's workshop felt like a city not because it resembled one literally, but because the <em>correspondence</em> was psychologically strong enough. The homography doesn't create this correspondence—it reveals it, materializes it, makes it visible.</p>
+<h2>synthesis</h2>
 
-<p>This is what computation offers: the ability to honor associations that exist only perceptually. The algorithm takes seriously what might otherwise remain a passing thought, a daydream. It transforms the imaginary into the concrete without demanding that the imaginary become realistic.</p>
+<p>There are far more parallels in our lives between different entities than we think. The electronics workshop is just as much a place with active life as the megalopolis of Kuala Lumpur. Both are systems of density, accumulation, energy. Both are chaotic in their own ways. Both contain their own logic.</p>
 
-<p>The workshop is still a mess. The tower of electronics hasn't moved. But now it contains Kuala Lumpur—not as metaphor, not as analogy, but as actual superposition. A third space that exists only in the projection, only in the mathematical transformation of one perspective into another.</p>
+<p>The workshop is still a mess. The tower of electronics hasn't moved. But now it contains Kuala Lumpur as superposition. A third space that exists only in the projection, only in the mathematical transformation of one perspective into another.</p>
+
+<p>This is what computation offers: the ability to materialize dreams, to take what exists only in perception and make it concrete. The algorithm honors a fleeting association, a daydream that might otherwise dissolve. It doesn't demand realism : it demands correspondence.</p>
+
+
+<p>I've been trying to get into ambient music production myself (pretty mediocrely so far, I'll admit), but this project made me happy—being able to use my engineering skills in the materialization of ideas. There's nothing more real than a dream when you give it permission to exist.</p>
+
+
+
+<p>I think about Eno's <a href="https://open.spotify.com/intl-fr/track/4t3Yh6tKkxXrc458pNI7zZ?si=db2275ef9e89408b"> Thursday Afternoon</a>. In the documentary, he describes it as the feeling of arriving in a new city—that specific moment of disorientation and anticipation. Slow, luminous synthesizer tones that shimmer and dissolve. Textures layering, never quite resolving. The sound moves like memory moves—gradual, atmospheric, suspended between observation and imagination.</p>
 
 <p>Sometimes the most interesting landscapes are the ones that never existed until you decided they did.</p>
 
-<hr style="margin: 30px 0; border: none; border-top: 1px solid #ccc;">
 
 
 
