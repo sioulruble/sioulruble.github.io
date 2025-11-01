@@ -11,7 +11,7 @@
 </head>
 <body>
     <header>
-        <h1>blog</h1>
+        <h1>imaginary landscapes</h1>
         <nav>
             <a href="../../../sioulruble.github.io/">home</a>
         </nav>
@@ -29,25 +29,25 @@
 
 <p>I'm someone who daydreams way too much. And I start fixating completely on this tower. It reminds me of something. I don't know what yet.</p>
 
-<p>Then it hits me—this view Walid and I had in Kuala Lumpur. We were in this sort of informal settlement with houses that made no architectural sense, grass, concrete, trees, a power line, and in the distance, the massive Kuala Lumpur skyline, majestic.</p>
+<p>Then it hits me : this view <a href="https://caveli.us/">Walid</a> and I had in Kuala Lumpur. We were in this sort of informal settlement with houses that made no architectural sense, grass, concrete, trees, a power line, and in the distance, the massive Kuala Lumpur skyline, majestic.</p>
 
 <img src="kl_skyscraper.jpg" alt="Kuala Lumpur skyscrapers through haze" style="width: 50%; margin: 20px 0;">
 
-<p>I'm looking at the tower but I'm not <em>there</em> anymore. The tower becomes architecture. The clutter becomes urbanism. The workshop dissolves into something else entirely.</p>
+<p>I'm looking at the tower but I'm not there anymore. The tower becomes architecture. The clutter becomes urbanism. The workshop dissolves into something else entirely.</p>
 
-<p>This is how memory works, I think. Surfaces map onto other surfaces. A pile of electronics <em>is</em> a skyscraper if the correspondence is strong enough.</p>
+<p>This is how memory works, I think. Surfaces map onto other surfaces. A pile of electronics is a skyscraper if the correspondence is strong enough.</p>
 
 <h2>correspondence</h2>
 
 <p>Then I remember this course in computer vision where we learned to superimpose two images with the right projection: homographic projection.</p>
 
-<p>Brian Eno describes his ambient works as "imaginary landscapes" : places that exist in the intersection of observation and projection. In <a href="https://youtu.be/1lH_qcLjmmU?si=mtxGGgUwT3toA8Q6"> the 1989 documentary </a>  of the same name, Eno walks through actual landscapes : California, Suffolk, New York while explaining how these physical spaces inform his mental ones. The instrumental pieces he creates aren't illustrations of place, but rather <em>landscapes for the mind</em>, spaces you inhabit perceptually rather than physically.</p>
+<p>Brian Eno describes his ambient works as "<b>landscapes</b> " : places that exist in the intersection of observation and projection. In <a href="https://youtu.be/1lH_qcLjmmU?si=mtxGGgUwT3toA8Q6">the 1989 documentary</a>  of the same name, Eno walks through actual landscapes : California, Suffolk, New York while explaining how these physical spaces inform his mental ones. The instrumental pieces he creates aren't illustrations of place, but rather landscapes for the mind, spaces you inhabit perceptually rather than physically.</p>
 
 <p><a href="https://open.spotify.com/intl-fr/album/6NhNNVgJ1w3pf1AOzAjSN3?si=g7DPS8b7QgeKFA422LB4PA">The Shutov Assembly</a>, released around that time, exemplifies this. Each piece has a nine-letter title referring to a real location without being in any way illustrative. The music exists parallel to the place, not as its representation.</p>
 
 <p>What if landscape is always already imaginary? What if space is just perspective waiting to be transformed?</p>
 
-<p>Homographic projection: a method for mapping one planar surface onto another through mathematical transformation.</p>
+<p><b>Homography projection</b> : a method for mapping one planar surface onto another through mathematical transformation.</p>
 
 <div style="padding: 15px; margin: 15px 0; background-color: transparent; border: 2px solid #000;">
 <strong>The homography matrix H relates corresponding points between two images:</strong><br><br>
@@ -73,8 +73,8 @@
 <p><strong>The code is minimal:</strong></p>
 
 <pre style="background-color: transparent; padding: 15px; border: 2px solid #000; border-radius: 0; overflow-x: auto; font-family: 'Courier New', 'Consolas', monospace;"><code># Load images
-img1 = cv2.imread("bordel_jc.jpeg")
-img2 = cv2.imread("kl_skyscraper.jpg")
+img1 = cv2.imread("electronic_mess.jpeg")
+img2 = cv2.imread("kl_skyscrapers.jpg")
 
 # Select 4 corresponding points on each image
 pts_img1 = [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
@@ -88,7 +88,7 @@ warped = cv2.warpPerspective(img2, H, (width, height))
 result = cv2.addWeighted(img1, 0.5, warped, 0.5, 0)
 </code></pre>
 
-<p>What interests me isn't the complexity : it's the <em>compression</em>. Four points. One matrix. Two realities collapse into a third space that belongs to neither.</p>
+<p>What interests me isn't the complexity : it's the compression. Four points. One matrix. Two realities collapse into a third space that belongs to neither.</p>
 
 
 <p>The result: Kuala Lumpur rising from tangled cables. Malaysia superimposed on Alsace. Neither location is preserved. Both are present.</p>
@@ -164,7 +164,7 @@ result = cv2.addWeighted(img1, 0.5, warped, 0.5, 0)
 
 <p> The 50-50 blend reveals something—not quite synthesis, more like interference. The two towers—one of components, one a skyscraper—superimpose majestically. A desk lamp becomes a street light. Cables everywhere suggest power lines crossing the urban grid. The scattered documentation and stacked speakers read as buildings. The glow of the skyscraper bleeds through the scene. Two forms of chaos layered into one.</p>
 
-<p>It's not realistic. It's not supposed to be. It's a study in <em>correspondence</em>—how one surface can activate the latent structure in another.</p>
+<p>It's not realistic. It's not supposed to be. It's a study in correspondence—how one surface can activate the latent structure in another.</p>
 
 
 
@@ -177,11 +177,11 @@ result = cv2.addWeighted(img1, 0.5, warped, 0.5, 0)
 <p>This is what computation offers: the ability to materialize dreams, to take what exists only in perception and make it concrete. The algorithm honors a fleeting association, a daydream that might otherwise dissolve. It doesn't demand realism : it demands correspondence.</p>
 
 
-<p>I've been trying to get into ambient music production myself (pretty mediocrely so far, I'll admit), but this project made me happy—being able to use my engineering skills in the materialization of ideas. There's nothing more real than a dream when you give it permission to exist.</p>
+<p>I've been trying to get into ambient music production myself (pretty mediocrely so far, I'll admit), but this project made me happy : being able to use my engineering skills in the materialization of ideas. There's nothing more real than a dream when you give it permission to exist.</p>
 
 
 
-<p>I think about Eno's <a href="https://open.spotify.com/intl-fr/track/4t3Yh6tKkxXrc458pNI7zZ?si=db2275ef9e89408b"> Thursday Afternoon</a>. In the documentary, he describes it as the feeling of arriving in a new city—that specific moment of disorientation and anticipation. Slow, luminous synthesizer tones that shimmer and dissolve. Textures layering, never quite resolving. The sound moves like memory moves—gradual, atmospheric, suspended between observation and imagination.</p>
+<p>I think about Eno's <a href="https://open.spotify.com/intl-fr/track/4t3Yh6tKkxXrc458pNI7zZ?si=db2275ef9e89408b"> Thursday Afternoon</a>. In the documentary, he describes it as the feeling of arriving in a new city : that specific moment of disorientation and anticipation. Slow, luminous synthesizer tones that shimmer and dissolve. Textures layering, never quite resolving. The sound moves like memory moves—gradual, atmospheric, suspended between observation and imagination.</p>
 
 <p>Sometimes the most interesting landscapes are the ones that never existed until you decided they did.</p>
 
