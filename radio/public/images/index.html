@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Audio × Image Transitions</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#c8c8c8;font-family:monospace;padding:16px;font-size:13px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #1e1e1e}
+#spec{image-rendering:pixelated;border:1px solid #2a2a2a;background:#0f0f0f}
+#srcs{margin-bottom:10px;display:flex;align-items:flex-start;gap:14px}
+.sw{text-align:center}
+.sw canvas{image-rendering:pixelated;display:block;width:96px;height:96px}
+.sw span{font-size:10px;color:#555;display:block;margin-top:3px}
+#pair{color:#5aafff;margin-bottom:10px;font-size:12px;letter-spacing:.06em}
+#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cell{background:#0f0f0f;border:1px solid #1e1e1e;padding:10px}
+.cell h2{font-size:10px;color:#ffaa55;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.cell p{font-size:9px;color:#555;line-height:1.5;margin-bottom:8px}
+.cell canvas{image-rendering:pixelated;width:100%;display:block;aspect-ratio:1}
+button{background:#111;color:#999;border:1px solid #333;padding:4px 14px;cursor:pointer;font-family:monospace;font-size:12px}
+button:hover{background:#1c1c1c;color:#bbb}
+input[type=file]{font-family:monospace;font-size:11px;color:#777}
+</style>
+</head>
+<body>
+<header>
+  <input type="file" id="af" accept="audio/*">
+  <button id="pb">▶ Play</button>
+  <audio id="ae" loop></audio>
+  <canvas id="spec" width="256" height="40"></canvas>
+</header>
+<div id="srcs"></div>
+<div id="pair">— img1 → img2</div>
+<div id="grid"></div>
+<script>
+const N=128,Q=32,QS=8; // 256/32=8
+const imgs=[null,null,null,null];
+let actx,anl,fBuf,tBuf,playing=false,prevE=0,lastBeat=0;
+
+const q=v=>Math.min(248,((v<0?0:v)/QS|0)*QS);
+
+// ── Load image → N×N grayscale quantized ─────────────────────────────────────
+function loadImg(src,idx){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');c.width=c.height=N;
+      const ctx=c.getContext('2d');ctx.drawImage(img,0,0,N,N);
+      const d=ctx.getImageData(0,0,N,N).data,out=new Uint8Array(N*N);
+      for(let i=0;i<N*N;i++) out[i]=q(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2]);
+      imgs[idx]=out;res();
+    };
+    img.onerror=()=>{
+      const out=new Uint8Array(N*N);
+      for(let i=0;i<N*N;i++) out[i]=q(((i%N)^(i/N|0))*4&248);
+      imgs[idx]=out;res();
+    };
+    img.src=src;
+  });
+}
+
+// ── FFT 1D Cooley-Tukey itératif, en place, n = puissance de 2 ───────────────
+function fft(re,im,inv){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){
+    let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;
+    if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}
+  }
+  for(let len=2;len<=n;len<<=1){
+    const ang=2*Math.PI/len*(inv?1:-1),wr=Math.cos(ang),wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){
+      let cr=1,ci=0;
+      for(let j=0,h=len>>1;j<h;j++){
+        const ur=re[i+j],ui=im[i+j];
+        const vr=re[i+j+h]*cr-im[i+j+h]*ci,vi=re[i+j+h]*ci+im[i+j+h]*cr;
+        re[i+j]=ur+vr;im[i+j]=ui+vi;re[i+j+h]=ur-vr;im[i+j+h]=ui-vi;
+        const t=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=t;
+      }
+    }
+  }
+  if(inv)for(let i=0;i<n;i++){re[i]/=n;im[i]/=n;}
+}
+
+// ── FFT 2D : lignes puis colonnes ─────────────────────────────────────────────
+function fft2(re,im,inv){
+  const r=new Float32Array(N),ri=new Float32Array(N);
+  for(let y=0;y<N;y++){
+    r.set(re.subarray(y*N,y*N+N));ri.set(im.subarray(y*N,y*N+N));
+    fft(r,ri,inv);re.set(r,y*N);im.set(ri,y*N);
+  }
+  const c=new Float32Array(N),ci=new Float32Array(N);
+  for(let x=0;x<N;x++){
+    for(let y=0;y<N;y++){c[y]=re[y*N+x];ci[y]=im[y*N+x];}
+    fft(c,ci,inv);
+    for(let y=0;y<N;y++){re[y*N+x]=c[y];im[y*N+x]=ci[y];}
+  }
+}
+
+// ── FFT d'une image + précalcul magnitude/phase ───────────────────────────────
+function imgFFT(arr){
+  const n2=N*N,re=new Float32Array(n2),im=new Float32Array(n2);
+  for(let i=0;i<n2;i++) re[i]=arr[i]/255;
+  fft2(re,im,false);
+  const mag=new Float32Array(n2),ph=new Float32Array(n2);
+  for(let i=0;i<n2;i++){mag[i]=Math.hypot(re[i],im[i]);ph[i]=Math.atan2(im[i],re[i]);}
+  return{re,im,mag,ph};
+}
+
+// Distance fréquentielle repliée normalisée (DC en 0,0)
+const HF=new Float32Array(N*N);
+for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+  const fx=x<N/2?x:N-x,fy=y<N/2?y:N-y;
+  HF[y*N+x]=Math.hypot(fx,fy)/(N/2);
+}
+
+// ── Extraction audio ──────────────────────────────────────────────────────────
+function getAudio(){
+  if(!anl) return{bass:0,mid:0,treble:0,energy:0,beat:false};
+  anl.getByteFrequencyData(fBuf);anl.getByteTimeDomainData(tBuf);
+  let bass=0; for(let i=0;i<9;i++) bass+=fBuf[i]; bass/=9;
+  let mid=0; for(let i=9;i<64;i++) mid+=fBuf[i]; mid/=55;
+  let tre=0; for(let i=64;i<256;i++) tre+=fBuf[i]; tre/=192;
+  let e=0; for(let i=0;i<tBuf.length;i++) e+=((tBuf[i]-128)/128)**2;
+  const energy=Math.sqrt(e/tBuf.length)*255;
+  const now=performance.now(),dE=energy-prevE;
+  const beat=dE>25&&energy>40&&now-lastBeat>200;
+  if(beat)lastBeat=now;
+  prevE=energy;
+  return{bass,mid,treble:tre,energy,beat};
+}
+
+// ── Transitions ───────────────────────────────────────────────────────────────
+const TR={
+  bitplane_lsb_to_msb:{
+    desc:'Crossfade plan de bits du LSB au MSB. La basse accélère localement la révélation pixel par pixel.',
+    fn(A,B,t,au,out){
+      const bm=au.bass/255*.3;
+      for(let i=0;i<N*N;i++){
+        const lt=Math.min(1,t+bm*(.5+.5*Math.sin(i*.017)));
+        let m=0; for(let b=0;b<(lt*8)|0;b++) m|=1<<b;
+        out[i]=q((A[i]&~m)|(B[i]&m));
+      }
+    }
+  },
+  bitplane_msb_to_lsb:{
+    desc:'Inverse du précédent : révélation du MSB vers le LSB. La basse module la vitesse locale.',
+    fn(A,B,t,au,out){
+      const bm=au.bass/255*.3;
+      for(let i=0;i<N*N;i++){
+        const lt=Math.min(1,t+bm*(.5+.5*Math.sin(i*.019+1)));
+        const nb=(lt*8)|0;
+        let m=0; for(let b=7;b>=8-nb;b--) m|=1<<b;
+        out[i]=q((A[i]&~m)|(B[i]&m));
+      }
+    }
+  },
+  xor_cascade:{
+    desc:'A XOR (masque(t) AND (A XOR B)). Les aigus densifient le masque ; le beat révèle un gros paquet de pixels.',
+    fn(A,B,t,au,out){
+      const d=1+au.treble/255*3,et=Math.min(1,t+(au.beat?.3:0));
+      for(let i=0;i<N*N;i++){
+        const noise=((i%N*7+(i/N|0)*13+i*3)&255)/255;
+        out[i]=q(A[i]^((noise<et*d?255:0)&(A[i]^B[i])));
+      }
+    }
+  },
+  quantization_collapse:{
+    desc:'Descend 32→2 niveaux de gris puis remonte vers B. L\'énergie contrôle la profondeur de collapse.',
+    fn(A,B,t,au,out){
+      const dep=au.energy/255;
+      for(let i=0;i<N*N;i++){
+        let v;
+        if(t<.5){
+          const lev=Math.max(2,Math.round(Q*(1-dep*t*2)));
+          const s=256/lev; v=(A[i]/s|0)*s;
+        } else {
+          const blend=(t-.5)*2;
+          const lev=Math.max(2,Math.round(Q*(1-dep)));
+          const s=256/lev;
+          v=(A[i]/s|0)*s*(1-blend)+B[i]*blend;
+        }
+        out[i]=q(v);
+      }
+    }
+  },
+  fourier_amplitude_interp:{
+    desc:'FFT 2D, interpolation des modules et phases, IFFT. Le mid booste les hautes fréquences spatiales (netteté pulsante).',
+    _c:null,
+    fn(A,B,t,au,out){
+      if(!this._c||this._c.A!==A||this._c.B!==B) this._c={A,B,fA:imgFFT(A),fB:imgFFT(B)};
+      const{fA,fB}=this._c,n2=N*N;
+      const re=new Float32Array(n2),im=new Float32Array(n2);
+      const mg=1+au.mid/255*2;
+      for(let i=0;i<n2;i++){
+        const boost=1+(mg-1)*HF[i];
+        const mag=(fA.mag[i]*(1-t)+fB.mag[i]*t)*boost;
+        let dp=fB.ph[i]-fA.ph[i];
+        if(dp>Math.PI)dp-=6.2832; if(dp<-Math.PI)dp+=6.2832;
+        const ph=fA.ph[i]+dp*t;
+        re[i]=mag*Math.cos(ph); im[i]=mag*Math.sin(ph);
+      }
+      fft2(re,im,true);
+      for(let i=0;i<n2;i++) out[i]=q(Math.max(0,Math.min(255,re[i]*255)));
+    }
+  },
+  fourier_phase_swap:{
+    desc:'Amplitude de A, phase de B. Le spectre audio sculpte les fréquences spatiales via un masque radial.',
+    _c:null,
+    fn(A,B,t,au,out){
+      if(!this._c||this._c.A!==A||this._c.B!==B) this._c={A,B,fA:imgFFT(A),fB:imgFFT(B)};
+      const{fA,fB}=this._c,n2=N*N;
+      const re=new Float32Array(n2),im=new Float32Array(n2);
+      for(let i=0;i<n2;i++){
+        const bin=Math.min(255,(HF[i]/1.4142*255)|0);
+        const spec=fBuf?fBuf[bin]/255:t;
+        const blend=t*.7+spec*.3;
+        const mag=fA.mag[i]*(1-blend)+fB.mag[i]*blend;
+        let dp=fB.ph[i]-fA.ph[i];
+        if(dp>Math.PI)dp-=6.2832; if(dp<-Math.PI)dp+=6.2832;
+        const ph=fA.ph[i]+dp*blend;
+        re[i]=mag*Math.cos(ph); im[i]=mag*Math.sin(ph);
+      }
+      fft2(re,im,true);
+      for(let i=0;i<n2;i++) out[i]=q(Math.max(0,Math.min(255,re[i]*255)));
+    }
+  },
+  heat_equation_melt:{
+    desc:'Box blur 3×3 itéré qui dissout A puis recompose B. L\'énergie module le nombre d\'itérations de flou.',
+    fn(A,B,t,au,out){
+      const buf=new Uint8Array(N*N),tmp=new Uint8Array(N*N);
+      for(let i=0;i<N*N;i++) buf[i]=A[i]*(1-t)+B[i]*t;
+      const iters=((1-Math.abs(t-.5)*2)*(3+au.energy/255*8))|0;
+      for(let k=0;k<iters;k++){
+        for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+          let s=0;
+          for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++)
+            s+=buf[Math.max(0,Math.min(N-1,y+dy))*N+Math.max(0,Math.min(N-1,x+dx))];
+          tmp[y*N+x]=s/9;
+        }
+        buf.set(tmp);
+      }
+      for(let i=0;i<N*N;i++) out[i]=q(buf[i]);
+    }
+  },
+  pixel_sort:{
+    desc:'Tri par luminance ligne par ligne entre A et B. Le beat déclenche une vague de tri du haut vers le bas.',
+    _wave:-1,_ra:new Array(N),_rb:new Array(N),
+    fn(A,B,t,au,out){
+      if(au.beat&&this._wave<0) this._wave=0;
+      if(this._wave>=0){this._wave+=2;if(this._wave>N+8)this._wave=-1;}
+      for(let y=0;y<N;y++){
+        const rt=this._wave>=0&&y<=this._wave?Math.min(1,t+.45):t;
+        for(let x=0;x<N;x++){this._ra[x]=A[y*N+x];this._rb[x]=B[y*N+x];}
+        this._ra.sort((a,b)=>a-b); this._rb.sort((a,b)=>a-b);
+        for(let x=0;x<N;x++){
+          const i=y*N+x;let v;
+          if(rt<.333) v=A[i]*(1-rt*3)+this._ra[x]*(rt*3);
+          else if(rt<.667){const lt=(rt-.333)*3;v=this._ra[x]*(1-lt)+this._rb[x]*lt;}
+          else{const lt=(rt-.667)*3;v=this._rb[x]*(1-lt)+B[i]*lt;}
+          out[i]=q(v);
+        }
+      }
+    }
+  },
+  audio_displacement:{
+    desc:'Déplace l\'échantillonnage de (dx,dy) modulé par spectrum×bass et waveform×mid. Le son distord la transition.',
+    fn(A,B,t,au,out){
+      for(let y=0;y<N;y++){
+        const wy=tBuf?((tBuf[y<<3]-128)/128*au.mid/255*18)|0:0;
+        for(let x=0;x<N;x++){
+          const wx=fBuf?(fBuf[x<<2]/255*au.bass/255*18)|0:0;
+          const sx=Math.max(0,Math.min(N-1,x+wx)),sy=Math.max(0,Math.min(N-1,y+wy));
+          out[y*N+x]=q(A[sy*N+sx]*(1-t)+B[sy*N+sx]*t);
+        }
+      }
+    }
+  }
+};
+
+// ── Setup : images sources ────────────────────────────────────────────────────
+const srcsDiv=document.getElementById('srcs');
+const srcCvs=[];
+for(let i=0;i<4;i++){
+  const w=document.createElement('div');w.className='sw';
+  const c=document.createElement('canvas');c.width=c.height=N;
+  const s=document.createElement('span');s.textContent='img'+(i+1);
+  w.append(c,s);srcsDiv.appendChild(w);srcCvs.push(c);
+}
+
+// ── Setup : grille de transitions ─────────────────────────────────────────────
+const gridDiv=document.getElementById('grid');
+const CVASES={},BUFS={};
+for(const[name,{desc}]of Object.entries(TR)){
+  const cell=document.createElement('div');cell.className='cell';
+  const h2=document.createElement('h2');h2.textContent=name.replace(/_/g,' ');
+  const p=document.createElement('p');p.textContent=desc;
+  const c=document.createElement('canvas');c.width=c.height=N;
+  cell.append(h2,p,c);gridDiv.appendChild(cell);
+  CVASES[name]=c;BUFS[name]=new Uint8Array(N*N);
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+const ae=document.getElementById('ae');
+document.getElementById('af').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  ae.src=URL.createObjectURL(f);
+  if(!actx){
+    actx=new AudioContext();anl=actx.createAnalyser();
+    anl.fftSize=1024;anl.smoothingTimeConstant=.8;
+    actx.createMediaElementSource(ae).connect(anl);
+    anl.connect(actx.destination);
+    fBuf=new Uint8Array(anl.frequencyBinCount); // 512 bins
+    tBuf=new Uint8Array(anl.fftSize);           // 1024 samples
+  }
+});
+
+document.getElementById('pb').addEventListener('click',()=>{
+  if(!ae.src)return;
+  if(actx?.state==='suspended')actx.resume();
+  playing=!playing;
+  playing?ae.play():ae.pause();
+  document.getElementById('pb').textContent=playing?'⏸ Pause':'▶ Play';
+});
+
+// ── Helpers rendu ─────────────────────────────────────────────────────────────
+function putGray(ctx,data){
+  const id=ctx.createImageData(N,N);
+  for(let i=0;i<N*N;i++){id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=data[i];id.data[i*4+3]=255;}
+  ctx.putImageData(id,0,0);
+}
+
+function drawSpec(){
+  if(!anl)return;
+  const c=document.getElementById('spec'),ctx=c.getContext('2d');
+  ctx.fillStyle='#0f0f0f';ctx.fillRect(0,0,256,40);
+  ctx.fillStyle='#4af';
+  for(let i=0;i<256;i++){const h=fBuf[i]/255*38;ctx.fillRect(i,40-h,1,h);}
+}
+
+// ── Boucle principale ─────────────────────────────────────────────────────────
+let t0=null,frame=0;
+const CYCLE=3,PNAMES=['img1 → img2','img2 → img3','img3 → img4','img4 → img1'];
+
+function loop(ts){
+  if(!t0)t0=ts;
+  const el=(ts-t0)/1e3;
+  const pi=Math.floor(el/CYCLE)%4;
+  const t=(el%CYCLE)/CYCLE;
+  const A=imgs[pi],B=imgs[(pi+1)%4];
+  document.getElementById('pair').textContent='— '+PNAMES[pi];
+  const au=getAudio();drawSpec();frame++;
+  for(const[name,tr]of Object.entries(TR)){
+    // Fourier toutes les 2 frames (IFFT coûteux)
+    if(name.startsWith('fourier')&&frame%2)continue;
+    if(!A||!B)continue;
+    tr.fn.call(tr,A,B,t,au,BUFS[name]);
+    putGray(CVASES[name].getContext('2d'),BUFS[name]);
+  }
+  requestAnimationFrame(loop);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+// Essaie jpg puis png comme fallback
+function tryLoad(base,idx){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas');c.width=c.height=N;
+      const ctx=c.getContext('2d');ctx.drawImage(img,0,0,N,N);
+      const d=ctx.getImageData(0,0,N,N).data,out=new Uint8Array(N*N);
+      for(let i=0;i<N*N;i++) out[i]=q(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2]);
+      imgs[idx]=out;res();
+    };
+    img.onerror=()=>loadImg(base+'.png',idx).then(res);
+    img.src=base+'.jpg';
+  });
+}
+
+Promise.all([0,1,2,3].map(i=>tryLoad('img'+(i+1),i))).then(()=>{
+  for(let i=0;i<4;i++) putGray(srcCvs[i].getContext('2d'),imgs[i]);
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>

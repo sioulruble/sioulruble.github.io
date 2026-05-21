@@ -1,0 +1,47 @@
+[
+  {
+    "src": "/images/img1.jpg",
+    "alt": "",
+    "meta": {
+      "dominantColor": null,
+      "palette": [],
+      "tags": []
+    }
+  },
+  {
+    "src": "/images/img2.jpg",
+    "alt": "",
+    "meta": {
+      "dominantColor": null,
+      "palette": [],
+      "tags": []
+    }
+  },
+  {
+    "src": "/images/img3.jpg",
+    "alt": "",
+    "meta": {
+      "dominantColor": null,
+      "palette": [],
+      "tags": []
+    }
+  },
+  {
+    "src": "/images/img4.jpg",
+    "alt": "",
+    "meta": {
+      "dominantColor": null,
+      "palette": [],
+      "tags": []
+    }
+  },
+  {
+    "src": "/images/img5.jpg",
+    "alt": "",
+    "meta": {
+      "dominantColor": null,
+      "palette": [],
+      "tags": []
+    }
+  }
+]
