@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filtre 8 nuances de gris</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: monospace;
+      background: #111;
+      color: #eee;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      font-weight: normal;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+      color: #aaa;
+    }
+
+    .subtitle {
+      font-size: 0.75rem;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    label.upload-btn {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border: 1px solid #444;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #aaa;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    label.upload-btn:hover {
+      border-color: #aaa;
+      color: #eee;
+    }
+
+    #fileInput { display: none; }
+
+    .shade-control {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    input[type=range] {
+      accent-color: #aaa;
+      width: 120px;
+    }
+
+    #shadeValue {
+      min-width: 1.5rem;
+      text-align: center;
+      color: #eee;
+    }
+
+    button#processBtn {
+      padding: 0.5rem 1rem;
+      border: 1px solid #555;
+      background: transparent;
+      color: #aaa;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    button#processBtn:hover {
+      border-color: #eee;
+      color: #eee;
+    }
+
+    button#processBtn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .palette {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .palette-label {
+      font-size: 0.7rem;
+      color: #555;
+      margin-right: 0.4rem;
+    }
+
+    .swatch {
+      width: 24px;
+      height: 24px;
+      border: 1px solid #333;
+    }
+
+    #gallery {
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .image-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 700px) {
+      .image-row { grid-template-columns: 1fr; }
+    }
+
+    .image-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .image-block-label {
+      font-size: 0.7rem;
+      color: #555;
+      letter-spacing: 0.05em;
+    }
+
+    .image-block img,
+    .image-block canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .image-name {
+      font-size: 0.75rem;
+      color: #666;
+      grid-column: 1 / -1;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid #222;
+    }
+
+    .stats {
+      font-size: 0.65rem;
+      color: #444;
+    }
+
+    .empty-state {
+      color: #333;
+      font-size: 0.85rem;
+      padding: 4rem 0;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h1>filtre — nuances de gris</h1>
+<p class="subtitle">quantification en N niveaux de gris uniformément répartis</p>
+
+<div class="controls">
+  <label class="upload-btn" for="fileInput">+ charger des images</label>
+  <input type="file" id="fileInput" accept="image/*" multiple>
+
+  <div class="shade-control">
+    <span>nuances :</span>
+    <input type="range" id="shadeSlider" min="2" max="256" value="8" step="1">
+    <span id="shadeValue">8</span>
+  </div>
+
+  <button id="processBtn" disabled>traiter</button>
+</div>
+
+<div class="palette" id="palette">
+  <span class="palette-label">palette :</span>
+</div>
+
+<div id="gallery">
+  <p class="empty-state">chargez des images pour commencer</p>
+</div>
+
+<script>
+  const fileInput  = document.getElementById('fileInput');
+  const shadeSlider = document.getElementById('shadeSlider');
+  const shadeValue  = document.getElementById('shadeValue');
+  const processBtn  = document.getElementById('processBtn');
+  const gallery     = document.getElementById('gallery');
+  const paletteEl   = document.getElementById('palette');
+
+  let loadedFiles = [];
+
+  // --- palette display ---
+  function updatePalette(n) {
+    const swatches = Array.from({ length: n }, (_, i) => {
+      const v = Math.round(i / (n - 1) * 255);
+      const s = document.createElement('div');
+      s.className = 'swatch';
+      s.style.background = `rgb(${v},${v},${v})`;
+      s.title = `${v}`;
+      return s;
+    });
+    paletteEl.querySelectorAll('.swatch').forEach(s => s.remove());
+    swatches.forEach(s => paletteEl.appendChild(s));
+  }
+
+  shadeSlider.addEventListener('input', () => {
+    shadeValue.textContent = shadeSlider.value;
+    updatePalette(Number(shadeSlider.value));
+    if (loadedFiles.length) renderAll();
+  });
+
+  updatePalette(8);
+
+  // --- file loading ---
+  fileInput.addEventListener('change', e => {
+    loadedFiles = Array.from(e.target.files);
+    processBtn.disabled = loadedFiles.length === 0;
+    if (loadedFiles.length) renderAll();
+  });
+
+  processBtn.addEventListener('click', renderAll);
+
+  // --- core filter ---
+  function applyGrayscaleFilter(imageData, numShades) {
+    const data = imageData.data;
+    const step = 255 / (numShades - 1);
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      // luminance-weighted grayscale (Rec. 709)
+      const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      // quantize to nearest level
+      const level = Math.round(gray / step);
+      const quantized = Math.round(level * step);
+      data[i] = data[i + 1] = data[i + 2] = quantized;
+      // alpha unchanged
+    }
+    return imageData;
+  }
+
+  // --- rendering ---
+  function renderAll() {
+    gallery.innerHTML = '';
+    const n = Number(shadeSlider.value);
+
+    loadedFiles.forEach(file => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const row = buildRow(file.name, img, n);
+        gallery.appendChild(row);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    });
+  }
+
+  function buildRow(name, img, numShades) {
+    const w = img.naturalWidth, h = img.naturalHeight;
+
+    // offscreen canvas for pixel processing
+    const offscreen = document.createElement('canvas');
+    offscreen.width = w; offscreen.height = h;
+    const ctx = offscreen.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, w, h);
+    applyGrayscaleFilter(imageData, numShades);
+    ctx.putImageData(imageData, 0, 0);
+
+    // display canvas (visible, responsive)
+    const displayCanvas = document.createElement('canvas');
+    displayCanvas.width = w; displayCanvas.height = h;
+    displayCanvas.getContext('2d').drawImage(offscreen, 0, 0);
+
+    const row = document.createElement('div');
+    row.className = 'image-row';
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'image-name';
+    nameEl.textContent = name;
+    row.appendChild(nameEl);
+
+    // original
+    const origBlock = document.createElement('div');
+    origBlock.className = 'image-block';
+    const origLabel = document.createElement('div');
+    origLabel.className = 'image-block-label';
+    origLabel.textContent = 'original';
+    const origImg = document.createElement('img');
+    origImg.src = img.src;
+    const origStats = document.createElement('div');
+    origStats.className = 'stats';
+    origStats.textContent = `${w} × ${h} px`;
+    origBlock.appendChild(origLabel);
+    origBlock.appendChild(origImg);
+    origBlock.appendChild(origStats);
+
+    // filtered
+    const filtBlock = document.createElement('div');
+    filtBlock.className = 'image-block';
+    const filtLabel = document.createElement('div');
+    filtLabel.className = 'image-block-label';
+    filtLabel.textContent = `${numShades} nuances de gris`;
+    const filtStats = document.createElement('div');
+    filtStats.className = 'stats';
+    filtStats.textContent = `quantification uniforme · Rec. 709`;
+    filtBlock.appendChild(filtLabel);
+    filtBlock.appendChild(displayCanvas);
+    filtBlock.appendChild(filtStats);
+
+    row.appendChild(origBlock);
+    row.appendChild(filtBlock);
+    return row;
+  }
+</script>
+</body>
+</html>

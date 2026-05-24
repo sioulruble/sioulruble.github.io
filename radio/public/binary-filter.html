@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Binary Segments</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    body { background: #fff; overflow: hidden; }
+    canvas { display: block; }
+    #loading {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: monospace; font-size: 13px;
+      background: #fff;
+    }
+    #ui {
+      position: fixed;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+      font-family: monospace; font-size: 12px;
+      background: rgba(255,255,255,0.85);
+      padding: 8px 14px; border-radius: 4px;
+    }
+    input[type=range] { width: 200px; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div id="loading">segmentation...</div>
+<canvas id="c"></canvas>
+<div id="ui" style="display:none">
+  <span>seuil petits</span>
+  <input type="range" id="slider" min="0" max="100" value="80">
+  <span id="val">80%</span>
+</div>
+<script>
+const THRESHOLD = 30;
+const MIN_AREA  = 6;
+const SMALL_SPD = 0.4;
+
+/* ── Harmonic episode ──────────────────────────────────────────────
+   Ratios  : 1 2 4 3 6 12 8  →  LCM = 24
+   Base spd: H_BASE px/frame pour ratio 1
+   Meeting : quand ratio=1 a parcouru LCM × H_BASE × H_SCALE px
+             → tous ont parcouru n×(LCM×H_BASE×H_SCALE), même phase
+   ──────────────────────────────────────────────────────────────── */
+const H_RATIOS   = [1, 2, 4, 3, 6, 12, 8];
+const H_LCM      = 24;
+const H_BASE     = 0.3;               // px/frame pour ratio 1
+const H_SCALE    = 30;                // distance de réunion = LCM × H_BASE × H_SCALE = 216 px
+const H_MEET_F   = Math.round(H_LCM * H_SCALE); // frames jusqu'à la rencontre (720 ≈ 12s)
+const H_CONV_F   = 80;                // frames pour la convergence
+const H_COOLDOWN = 900;               // frames de repos après réunion
+
+/* phase globale des petits */
+let hPhase  = 'sync';   // 'sync' | 'harmonic' | 'converge'
+let hTimer  = 0;
+let hCool   = H_COOLDOWN;  // démarre en cooldown
+
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const slider = document.getElementById('slider');
+const valEl  = document.getElementById('val');
+
+const img = new Image();
+img.src = 'images/img5.jpg';
+
+img.onload = () => {
+  const scale = Math.min(1, canvas.width / img.naturalWidth);
+  const iw = Math.round(img.naturalWidth  * scale);
+  const ih = Math.round(img.naturalHeight * scale);
+  const offX = Math.round((canvas.width - iw) / 2);
+  const offY = Math.round((canvas.height - ih) / 2);
+
+  const tmp = document.createElement('canvas');
+  tmp.width = iw; tmp.height = ih;
+  const tctx = tmp.getContext('2d');
+  tctx.drawImage(img, 0, 0, iw, ih);
+  const { data } = tctx.getImageData(0, 0, iw, ih);
+
+  const bin = new Uint8Array(iw * ih);
+  for (let i = 0; i < iw * ih; i++) {
+    const lum = 0.299 * data[i*4] + 0.587 * data[i*4+1] + 0.114 * data[i*4+2];
+    bin[i] = lum < THRESHOLD ? 1 : 0;
+  }
+
+  /* BFS */
+  const labels = new Int32Array(iw * ih).fill(-1);
+  const comps  = [];
+  for (let start = 0; start < iw * ih; start++) {
+    if (bin[start] !== 1 || labels[start] !== -1) continue;
+    const label = comps.length;
+    const queue = [start];
+    let head = 0;
+    labels[start] = label;
+    let minX = iw, maxX = 0, minY = ih, maxY = 0;
+    while (head < queue.length) {
+      const idx = queue[head++];
+      const x = idx % iw, y = (idx / iw) | 0;
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+      if (y > 0    && bin[idx-iw]===1 && labels[idx-iw]===-1) { labels[idx-iw]=label; queue.push(idx-iw); }
+      if (y < ih-1 && bin[idx+iw]===1 && labels[idx+iw]===-1) { labels[idx+iw]=label; queue.push(idx+iw); }
+      if (x > 0    && bin[idx-1] ===1 && labels[idx-1] ===-1) { labels[idx-1] =label; queue.push(idx-1);  }
+      if (x < iw-1 && bin[idx+1] ===1 && labels[idx+1] ===-1) { labels[idx+1] =label; queue.push(idx+1);  }
+    }
+    if (queue.length >= MIN_AREA) comps.push({ pixels: queue, minX, maxX, minY, maxY, area: queue.length });
+  }
+
+  const filtered   = comps;
+  const sortedAreas = filtered.map(c => c.area).sort((a, b) => a - b);
+
+  const elements = filtered.map(({ pixels, minX, maxX, minY, maxY, area }) => {
+    const bw = maxX - minX + 1, bh = maxY - minY + 1;
+    const c = document.createElement('canvas');
+    c.width = bw; c.height = bh;
+    const sCtx = c.getContext('2d');
+    const imgD = sCtx.createImageData(bw, bh);
+    for (const pidx of pixels) {
+      const px = pidx % iw - minX, py = ((pidx / iw) | 0) - minY;
+      imgD.data[(py * bw + px) * 4 + 3] = 255;
+    }
+    sCtx.putImageData(imgD, 0, 0);
+    return {
+      sprite: c,
+      originX: offX + minX, originY: offY + minY,
+      offset: 0,
+      area,
+      isSmall: false,
+      baseSpeed: 0.3 + Math.random() * 5,
+      speed: 0,
+      hRatio: 1,
+      convFrom: 0, convTo: 0,
+    };
+  });
+
+  function getSmalls() { return elements.filter(el => el.isSmall); }
+
+  function applyThreshold(percentile) {
+    const cutoff = sortedAreas[Math.floor(sortedAreas.length * percentile / 100)] ?? 0;
+    for (const el of elements) {
+      el.isSmall = el.area <= cutoff;
+      if (!el.isSmall) el.speed = el.baseSpeed;
+    }
+    /* si on change le seuil pendant un épisode, on réinitialise */
+    if (hPhase !== 'sync') {
+      hPhase = 'sync'; hTimer = 0; hCool = H_COOLDOWN;
+      getSmalls().forEach(el => { el.speed = SMALL_SPD; });
+    } else {
+      getSmalls().forEach(el => { el.speed = SMALL_SPD; });
+    }
+  }
+
+  applyThreshold(parseInt(slider.value));
+  slider.addEventListener('input', () => {
+    const p = parseInt(slider.value);
+    valEl.textContent = p + '%';
+    applyThreshold(p);
+  });
+
+  /* ── Déclenchement harmonique ── */
+  function startHarmonic() {
+    hPhase = 'harmonic'; hTimer = 0;
+    const smalls = getSmalls();
+    const ratios = [...H_RATIOS].sort(() => Math.random() - 0.5);
+    smalls.forEach((el, i) => {
+      el.hRatio = ratios[i % ratios.length];
+      el.speed  = H_BASE * el.hRatio;
+    });
+  }
+
+  function startConverge() {
+    hPhase = 'converge'; hTimer = 0;
+    const smalls = getSmalls();
+    /* cible = offset du plus lent (ratio le plus petit parmi les actuels) */
+    const ref = smalls.reduce((a, b) => a.hRatio < b.hRatio ? a : b);
+    smalls.forEach(el => {
+      el.convFrom = el.offset;
+      /* on aligne sur le ref en choisissant le multiple de canvas.width le plus proche */
+      const raw = ref.offset;
+      const dist = el.offset - raw;
+      const n = Math.round(dist / canvas.width);
+      el.convTo = raw + n * canvas.width;
+    });
+  }
+
+  function endConverge() {
+    hPhase = 'sync'; hTimer = 0; hCool = H_COOLDOWN;
+    const smalls = getSmalls();
+    const target = smalls[0]?.convTo ?? 0;
+    smalls.forEach(el => { el.offset = el.convTo; el.speed = SMALL_SPD; });
+  }
+
+  function tickPhase() {
+    const smalls = getSmalls();
+    if (hPhase === 'sync') {
+      if (hCool > 0) { hCool--; return; }
+      /* ~10% de chance par "fenêtre" de H_COOLDOWN frames → p ≈ 0.1/H_COOLDOWN */
+      if (smalls.length > 0 && Math.random() < 0.1 / H_COOLDOWN) startHarmonic();
+    } else if (hPhase === 'harmonic') {
+      hTimer++;
+      if (hTimer >= H_MEET_F) startConverge();
+    } else if (hPhase === 'converge') {
+      hTimer++;
+      const t = Math.min(hTimer / H_CONV_F, 1);
+      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
+      smalls.forEach(el => {
+        el.offset = el.convFrom + (el.convTo - el.convFrom) * ease;
+      });
+      if (hTimer >= H_CONV_F) endConverge();
+    }
+  }
+
+  document.getElementById('loading').remove();
+  document.getElementById('ui').style.display = 'flex';
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    tickPhase();
+
+    for (const el of elements) {
+      /* offset monotone croissant → x par modulo */
+      let x = el.originX - el.offset;
+      x = ((x % canvas.width) + canvas.width) % canvas.width;
+      ctx.drawImage(el.sprite, x, el.originY);
+      if (x + el.sprite.width > canvas.width)
+        ctx.drawImage(el.sprite, x - canvas.width, el.originY);
+
+      if (hPhase !== 'converge') el.offset += el.speed;
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+};
+</script>
+</body>
+</html>
