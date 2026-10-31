@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research — Louis Rublé</title>
+<meta name="description" content="Louis Rublé, PhD candidate at ISIR, Sorbonne University, working on turn-taking, interruptions and backchannels in socio-emotional dialogue agents and social robots.">
+<link rel="icon" type="image/png" href="medias/favicon.png">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Times New Roman", Times, serif;
+    color: #000;
+    background: #fff url("medias/background.webp") center / cover no-repeat fixed;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  main {
+    max-width: 720px;
+    margin: 80px auto;
+    padding: 32px 36px;
+    background: rgba(255, 255, 255, 0.88);
+    /* halo blanc flou : fondu progressif du bloc vers l'image de fond */
+    box-shadow: 0 0 60px 40px rgba(255, 255, 255, 0.88);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  header > img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  h1 {
+    font-size: 2.6em;
+    font-weight: normal;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .email {
+    font-size: 0.9em;
+    font-style: italic;
+    margin: 6px 0 0;
+  }
+  /* liens dans un cadre fin */
+  .links {
+    width: fit-content;
+    margin: 12px 0 0;
+    padding: 3px 12px;
+    font-size: 0.85em;
+    text-align: center;
+    letter-spacing: 0.05em;
+    border: 1px solid #000;
+  }
+  .links span { margin: 0 0.6em; }
+  /* petits logos dans le texte, à côté du nom de l'institution */
+  .logo { vertical-align: middle; width: auto; }
+  .logo.sorbonne { height: 1.3em; }
+  /* surlignage façon marqueur, sur la moitié basse du texte */
+  mark {
+    color: inherit;
+    background: linear-gradient(transparent 45%, rgba(0, 0, 0, 0.16) 45%);
+    padding: 0 2px;
+  }
+  a { color: #000; text-decoration: none; }
+  a:hover, a:focus { text-decoration: underline; }
+  /* liens dans le texte : bleu soutenu, sans soulignement */
+  main > p a:not(:has(img)) { color: #26397f; }
+  main > p a:not(:has(img)):hover { color: #1a2550; text-decoration: none; }
+  p { margin: 0 0 1em; }
+  .more { margin: -0.5em 0 1.2em; font-size: 0.95em; }
+  .more summary { cursor: pointer; font-style: italic; color: #444; }
+  .more summary:hover { color: #000; }
+  .more ul { margin: 0.6em 0 0; padding-left: 1.2em; }
+  .more li { margin-bottom: 0.5em; line-height: 1.45; }
+  /* séparateurs : trait fin gris, discret */
+  hr {
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.3);
+    margin: 28px 0;
+  }
+  .more li.edu {
+    padding-bottom: 0.6em;
+    margin-bottom: 0.8em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  }
+  /* ligne publications, discrète, dans le style des dépliables */
+  .pubs { font-size: 0.95em; font-style: italic; color: #444; }
+
+  @media (max-width: 600px) {
+    main {
+      margin: 32px 16px;
+      padding: 24px 20px;
+      box-shadow: 0 0 24px 12px rgba(255, 255, 255, 0.88);
+    }
+    header { flex-direction: column; text-align: center; gap: 16px; }
+    .links { margin: 12px auto 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="medias/me.png" alt="Louis Rublé">
+    <div>
+      <h1>Louis Rublé</h1>
+      <p class="email"><a href="mailto:louis.ruble@etu.sorbonne-universite.fr">louis.ruble@etu.sorbonne-universite.fr</a></p>
+      <nav class="links">
+        <a href="https://github.com/sioulruble">GitHub</a><span>/</span><a href="https://www.linkedin.com/in/louis-rubl%C3%A9-49b596225/">LinkedIn</a><span>/</span><a href="medias/cv.pdf">CV</a>
+      </nav>
+    </div>
+  </header>
+
+  <hr>
+
+  <p>Hi, I'm Louis, a first-year PhD candidate at Sorbonne University <a href="https://www.sorbonne-universite.fr"><img src="medias/sorbonne.png" alt="Sorbonne University website" class="logo sorbonne"></a>, supervised by <a href="https://scholar.google.com/citations?user=n9ZNrsEAAAAJ&amp;hl=en">Catherine Pelachaud</a>, inside the <a href="https://www.isir.upmc.fr/equipes/acide/presentation-acide/">ACIDE</a> team at ISIR. My research focuses on <mark>interruption, turn-taking, and backchannels</mark> in <mark>socio-emotional dialogue agents</mark>, exploring how conversational systems can perceive, anticipate, and adapt to the dynamics of social interaction. Broadly, I combine deep learning, multimodal perception, and computational modelling to study the cognitive mechanisms underlying human communication.</p>
+
+  <p>What fascinates me most in my field is the <mark><em>Media Equation</em></mark> (Reeves &amp; Nass): people tend to treat machines as social partners, applying to them the same expectations they hold towards humans. This raises the question at the heart of my research: since the way an agent takes the floor, interrupts, or gives feedback already says something about who it seems to be, can we modulate the personality people attribute to it across several modalities, i.e. speech, gaze, gesture, facial expression, and timing, and even across different platforms?</p>
+
+  <p class="pubs">Publications: coming soon, my first papers are in preparation.</p>
+
+  <p>Previously, I worked between research labs and humanoid robotics startups, from designing social behaviours for the Mirokai robot at Enchanted Tools to studying humanoid teleoperation at AIST in Japan.</p>
+  <details class="more">
+    <summary>More about my previous experience</summary>
+    <ul>
+      <li class="edu"><strong>Education</strong> — I studied electronics and computer engineering for two years at Université Paris-Saclay, before completing a Master’s degree in computer science at UTC, including an exchange semester in robotics at the University of Zaragoza, Spain.</li>
+      <li><strong>UMA, Paris</strong>, <em>Robot Operator</em> (2026) — I spent the summer operating robots at a Paris startup, collecting task-specific data and feeding behavioural observations back to the engineering team.</li>
+      <li><strong>AIST-CNRS JRL, Tsukuba</strong>, <em>Research Intern, Humanoid Teleoperation</em> (2025–2026) — I studied how RGB-D augmented feedback affects humanoid teleoperation: I designed the user study, built a pipeline to extract performance metrics automatically from camera data, and sped up a shared-autonomy intent detection system for on-robot use.</li>
+      <li><strong>UTC, Compiègne</strong>, <em>Project Assistant</em> (2024–2025) — During my studies at the Université de Technologie de Compiègne, I worked as a project assistant on emotion recognition for people wearing VR headsets: I developed an AR algorithm that simulates a headset on the face, built a dedicated dataset and trained a CNN on it, then moved to dimensional emotion analysis with a Vision Transformer that predicts valence and arousal.</li>
+      <li><strong>Enchanted Tools, Paris</strong>, <em>Social Robotics Engineer Intern</em> (2023–2024) — I worked on the Mirokai humanoid, building a multimodal active speaker detection system (face tracking, speech recognition, sound localisation) and designing social behaviours that shipped to production.</li>
+      <li><strong>L2S, CentraleSupélec</strong>, <em>Software Engineering Intern</em> (2022) — My first research experience, in computational imaging, where I ported and optimised an image reconstruction algorithm in Python.</li>
+    </ul>
+  </details>
+
+  <p>Studying the history of technics helps me understand how the tools we build reshape the way we live and work together. I see social robots as heirs of the Industrial Revolution, which introduced machines to reduce human labour and increase productivity, standardising work in the process. Social robots extend this logic to interaction itself: if we are not careful, they could end up standardising the way we relate to one another. Drawing on Bernard Stiegler’s work on how industrial technologies can erode human know-how, I question not only what technology makes possible, but also <mark>what kinds of relationships it encourages us to develop</mark>.</p>
+  <p>Outside research, I enjoy playing <a href="https://www.chess.com/member/tacos2viandes">chess</a>, discussing philosophy and science fiction, listening to ambient music, and watching films in the Latin Quarter.</p>
+
+  <hr>
+
+  <p>If my work or perspective resonates with you, feel free to <a href="mailto:louis.ruble@etu.sorbonne-universite.fr">reach out</a>: I'm always happy to talk!</p>
+</main>
+</body>
+</html>
